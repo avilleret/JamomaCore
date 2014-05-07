@@ -33,74 +33,84 @@
 */
 
 class TTFOUNDATION_EXPORT TTString {
+
+	char	*mString;
+	size_t	mSize;
+
 public:
-	TTPtr	mVector;	//	pointer to std::vector<char>, left public so it can be easily accessed by functors and helper methods
 
-	/** Constructor */
-	TTString(const char *aCString = "");	
-	
+	/** Constructors */
+	TTString(const char *aCString = "");
+	TTString(const TTString& aTTString);
 	TTString(const std::string& aStdString);
-	
-//	TTString(std::vector<char>::iterator begin, std::vector<char>::iterator end);
-
-	TTString(const TTString& other);
 	
 	/** Destructor */
 	~TTString();
 
-	char& at(size_t index) const;
-
-	void push_back(char c);
-
-	void clear();
-
-	bool empty();
-
-	void reserve(size_t size);
-
-	size_t capacity();
-	
-	const char* data();
-	
-	/** Return a pointer to the internal C-string */
-	const char* c_str() const;
-	
-	
-	/** Cast to a C-string. */
-	operator const char*() const
-	{
-		std::vector<char>* my_vector = (std::vector<char>*)mVector;
-		return &my_vector->at(0);
-	}
-	
-	/** Assign from a C-string. */
+	/** Assign operators. */
 	TTString& operator = (const char* aCString);
-	
-	/** Assign from a std::string. */
-	TTString& operator = (std::string& aStdString);
-	
-	/** Assign from a simple char. */
 	TTString& operator = (const char aChar);
-	
-	/** Overload to assign from a C-string. */
-	void assign(const char* aCString, size_t length = 0);
-	
-	/** Assign from a std::string. */
-	void assign(const std::string& aStdString);
-	
+	TTString& operator = (const TTString& aTTString);
+	TTString& operator = (const std::string& aStdString);
+
+	//////////////
+	// Capacity //
+	//////////////
+
 	/** Find out the length of a string.  */
 	size_t size() const;
-	
+
 	/** Find out the length of a string.  */
 	size_t length() const;
-	
-	// because when size() == 0 there is still a char (null terminator) in the vector, we have to override this
-	bool empty() const;
+
+	/** TODO : Return maximum size of string.  */
+	//size_t max_size() const;
 
 	/** Allocate  memory for the string. */
 	void resize(size_t newSize);
-	
 
+	/** TODO : Return size of allocated storage. */
+	//size_t capacity();
+
+	/** TODO : Request a change in capacity */
+	//size_t reserve(size_t n = 0);
+
+	/** Clear string. */
+	void clear();
+
+	/** Test if string is empty. */
+	bool empty();
+
+	// because when size() == 0 there is still a char (null terminator) in the vector, we have to override this
+	/** Test if string is empty. */
+	bool empty() const;
+
+	/** TODO : Shrink to fit. */
+	//void shrink_to_fit();
+
+	////////////////////
+	// Element access //
+	////////////////////
+
+	// This avoids a warning in GCC 4.7 about ambiguity between using an int vs. a size_t where
+	// the int could also be considered an index into a char array
+	/** Get character of string. */
+	char& operator[] (const int index);
+
+	/** Get character in string */
+	char& at(size_t index) const;
+
+	///////////////
+	// Modifiers //
+	///////////////
+
+	/** Append to string operator. */
+	TTString& operator += (const char *aCString);
+
+	/** Append to string operator. */
+	TTString& operator += (TTString& aTTString);
+
+	/** Append to string operator. */
 	template<class T>
 	TTString& operator += (const T& arg)
 	{
@@ -108,83 +118,89 @@ public:
 		return (*this);
 	}
 
-
-	template<class T>
-	TTString& operator += (const TTString& anotherString)
-	{
-		append(anotherString.c_str(), anotherString.length());
-		return (*this);
-	}
-
-
-	template<class T>
-	TTString& operator += (const std::string& aStdString)
-	{
-		append(aStdString.c_str(), aStdString.length());
-		return (*this);
-	}
-
-	/** Append / Concatenate */
-	void append(const char *str, size_t length = 0);
-	void append(const char aChar);
-	void append(int anInt);
-	void append(unsigned int aUInt);
-	void append(float aFloat);
-	void append(double aDouble);
-
-
-//	template<class T>
-//	TTString operator + (const T& arg)
-//	{
-//		TTString result = *this;	// Make a copy of myself
-//		result += arg;				// Use += to add arg to the copy.
-//		return result;
-//	}
-
+	/** Append to string operator. */
 	TTString operator + (const char* arg);
 
+	/** Append to string */
+	TTString& append(const char *aCString, size_t length = 0);
+	TTString& append(const char aChar);
+	TTString& append(TTString aTTString);
+	TTString& append(int anInt);
+	TTString& append(unsigned int aUInt);
+	TTString& append(float aFloat);
+	TTString& append(double aDouble);
 
+	/** TODO : Append character to string */
+	//TTString& push_back(const char aChar);
 
-	bool operator == (const char *cString) const;
-	
-	bool operator == (const TTString &other) const;
+	/** TODO : Assign content to string */
+	//TTString& assign(const TTString& aTTString);
 
-	bool operator != (const char *cString) const;
+	/** TODO : Insert into string */
+	//TTString& insert(size_t pos, const aTTString& str);
 
-	bool operator != (const TTString &other) const;
+	/** TODO : Erase characters from string */
+	//TTString& erase(size_t pos = 0, size_t len = npos);
 
-	
+	/** TODO : Replace portion of string */
+	//TTString& replace(size_t pos, size_t len, const aTTString& str);
+
+	/** TODO : Swap string values */
+	//void swap (aTTString& str);
+
+	/** TODO : Delete last character */
+	//TTString& pop_back();
+
+	////////////////////////
+	// Strings operations //
+	////////////////////////
+
+	/** Return a pointer to the internal C-string */
+	const char* c_str() const;
+
+	/** Return a pointer to the internal C-string */
+	const char* data();
+
 	/** Return the index of the first instance of a specified char in the string.
-		@param	aChar	The char for which to search
-		@param	from	A position in the string from which to begin the search.  By default it starts at the beginning (0)
-	 */
+	@param	aChar	The char for which to search
+	@param	from	A position in the string from which to begin the search.  By default it starts at the beginning (0)
+	*/
 	size_t find_first_of(const char aChar, size_t from = 0);
-    
-    /** Return the index of the last instance of a specified char in the string.
-     @param	aChar	The char for which to search
-	 */
+
+	/** Return the index of the last instance of a specified char in the string.
+	@param	aChar	The char for which to search
+	*/
 	size_t find_last_of(const char aChar);
 
-	
 	/** Returns a string object with its contents initialized to a substring of the current object.
-		@param pos	Position of a character in the current string object to be used as starting character for the substring.
-		@param n 	Length of the substring.
-	 */
+	@param pos	Position of a character in the current string object to be used as starting character for the substring.
+	@param n 	Length of the substring.
+	*/
 	TTString substr(size_t pos = 0, size_t n = 1) const;
-	
 
-	// This avoids a warning in GCC 4.7 about ambiguity between using an int vs. a size_t where
-	// the int could also be considered an index into a char array
-	char& operator[] (const int index);
+	/** Comparison operator. */
+	bool operator == (const char *aCString) const;
+
+	/** Comparison operator. */
+	bool operator == (TTString aTTString) const;
+
+	/** Comparison operator. */
+	bool operator != (const char *aCString) const;
+
+	/** Comparison operator. */
+	bool operator != (TTString aTTString) const;
 	
+	/** Cast to a C-string. */
+	operator const char*() const
+	{
+		return mString;
+	}
 	
 	// NOTE: we do not export TTString because it is defined in a header as a subclass of a stl template
 	// but we do want to export this method, which is not defined inline so that we don't pick up a direct
 	// dependency on Mersenne Twister
 	/** Replace contents with a pseudo-random string. */
 	void random();
-	
-    
 	
 //	TTBoolean toTTInt32( const TTString & str, TTInt32 & convertedInt )
 	TTBoolean toTTInt32(TTInt32& convertedInt) const;
@@ -247,23 +263,36 @@ TTLogError("uh oh -- this functions doesn't work compiled with clang on ubuntu!"
 }
 
 #elif defined( TT_PLATFORM_WIN )
-namespace std 
-{
+//namespace std 
+//{
 //    namespace tr1 
 //    { 
-        template <> 
-        struct hash<TTString> : public unary_function<TTString, size_t>
-        { 
-			public:
-				size_t operator()(const TTString& self) const
-				{
-					std::string* my_vector = (std::string*)self.mVector;
-					size_t hashkey = _Hash_seq((const unsigned char*)my_vector->data(), my_vector->size()); //std::hash(self.data(), self.size());
-					//cout << "HASH: " << self.data() << " with size: " << self.size() << " = " << hashkey << endl;
-					return hashkey;
-				}
-			};
+//        template <> 
+//        struct hash<TTString> : public unary_function<TTString, size_t>
+//        { 
+//			public:
+//				size_t operator()(const TTString& self) const
+//				{
+//					size_t hashkey = std::hash(self.c_str(), self.size());
+//					cout << "HASH: " << self.c_str() << " with size: " << self.size() << " = " << hashkey << endl;
+//					return hashkey;
+//				}
+//			};
 //    } 
+//}
+namespace std
+{
+	template <> 
+	struct hash<TTString>
+	{ 
+	public:
+		size_t operator()(const TTString& self) const
+		{
+			size_t hashkey = std::hash<std::string>()(self.c_str());
+			cout << "HASH: " << self.c_str() << " with size: " << self.size() << " = " << hashkey << endl;
+			return hashkey;
+		}
+	};
 }
 
 #else // gcc 4.7

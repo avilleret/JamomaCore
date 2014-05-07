@@ -9,9 +9,6 @@
 #include "TTString.h"
 #include "MersenneTwister.h"
 
-
-#define VECTOR ((std::string*)mVector)
-
 void TTString::random()
 {
 	MTRand			twister;
@@ -23,272 +20,167 @@ void TTString::random()
 	(*this) = s;
 }
 
-
-
-/** Constructor */
-TTString::TTString(const char *aCString) : 
-mVector(NULL)
+TTString::TTString(const char *aCString) 
 {
-	assign(aCString);
+	mString = NULL; 
+	mSize = 0; 
+	operator = (aCString);
+	//TTLogDebug("TTString NEW %p %s\n", this, aCString);
 }
 
-
-TTString::TTString(const std::string& aStdString) :
-mVector(NULL)
+TTString::TTString(const TTString& aTTString)
 {
-	assign(aStdString);
+	mString = NULL;
+	mSize = 0;
+	operator = (aTTString);
 }
 
-/*
-TTString::TTString(std::string::iterator begin, std::string::iterator end) :
-mVector(NULL)
+TTString::TTString(const std::string& aStdString)
 {
-	TTPtrSizedInt newsize = (end - begin);
-
-	mVector = new std::string;
-
-	reserve(newsize + 16);
-	for (std::string::iterator c = begin; c != end; ++c) {
-		push_back(*c);
-	}
-
-	// In some cases the range has NULL termination included, in other cases not.
-	// In these cases we need to correct the size of the string to match the C-String.
-	// If we don't then two strings with identical contents (e.g. "foo" and "foo") will hash to different values.
-	// If then looked-up in the symbol table we corrupt the symbol table with two entries for the same string!
-	TTBoolean resized = NO;
-
-	for (TTPtrSizedInt i = newsize - 1; i>0; i--) {
-		if (VECTOR->at(i) != 0) {
-			resize(i + 1);
-			resized = YES;
-			break;
-		}
-	}
-	if (!resized)
-		resize(newsize); // ensure NULL termination
-}
-*/
-
-TTString::TTString(const TTString& other) :
-mVector(NULL)
-{
-	assign(other.c_str());
+	mString = NULL;
+	mSize = 0;
+	operator = (aStdString.c_str());
 }
 
-/** Destructor */
 TTString::~TTString()
 {
-	delete mVector;
+	if (mString)
+		delete[] mString;
 }
 
-char& TTString::at(size_t index) const
-{
-	std::string& vec = *VECTOR;
-	if (vec.empty())
-		return *new char(0);
-	else
-		return vec.at(index);
-}
-
-
-void TTString::push_back(char c)
-{
-	VECTOR->push_back(c);
-}
-
-const char* TTString::data()
-{
-	return VECTOR->data();
-}
-
-
-/** Return a pointer to the internal C-string */
-const char* TTString::c_str() const
-{
-	return VECTOR->c_str();
-}
-
-
-void TTString::clear()
-{
-	VECTOR->clear();
-}
-
-
-bool TTString::empty()
-{
-	return VECTOR->empty();
-}
-
-
-void TTString::reserve(size_t size)
-{
-	VECTOR->reserve(size);
-}
-
-size_t TTString::capacity()
-{
-	return VECTOR->capacity();
-}
-
-
-/** Assign from a C-string. */
 TTString& TTString::operator = (const char* aCString)
 {
-	assign(aCString);
+	if (!aCString)
+	{
+		clear();
+		return *this;
+	}
+
+	int len = strlen(aCString);
+
+	if (len < mSize)
+		strcpy(mString, aCString);
+	else
+	{
+		if (mString)
+		{
+			delete[] mString;
+			mString = NULL;
+		}
+
+		mSize = len + 1;
+		mString = new char[mSize];
+
+		if (!mString)
+			mSize = 0;
+		else
+			strcpy(mString, aCString);
+	}
+
 	return *this;
 }
 
-
-/** Assign from a std::string. */
-TTString& TTString::operator = (std::string& aStdString)
-{
-	assign(aStdString);
-	return *this;
-}
-
-
-/** Assign from a simple char. */
 TTString& TTString::operator = (const char aChar)
 {
-	resize(1);
-	VECTOR->at(0) = aChar;
+	mString = NULL;
+	mSize = 1;
+	mString = new char[mSize];
+	mString[0] = aChar;
 	return *this;
 }
 
-
-/** Overload to assign from a C-string. */
-void TTString::assign(const char* aCString, size_t length)
+TTString& TTString::operator = (const TTString& aTTString)
 {
-	if (!mVector)
-		mVector = new std::string;
-
-	if (length == 0) { // no length defined, so check the c-string in the traditional way
-		if (aCString)
-			length = strlen(aCString);
-	}
-
-	/*
-	if ((length + 1) >= capacity())
-		reserve(length + 16);
-
-	resize(length);
-	if (length) {
-		std::vector<char>& vec = *VECTOR;
-		memcpy(&vec[0], aCString, length);
-//		vec.assign(aCString, length);
-//		vec.resize(vec.size() + 1);
-		vec[vec.size() - 1] = 0;
-	}
-	*/
-//	if (length && aCString)
-		VECTOR->assign(aCString, length);
+	mString = NULL; 
+	mSize = 0;
+	return operator = (aTTString.mString);
 }
 
-
-/** Assign from a std::string. */
-void TTString::assign(const std::string& aStdString)
+TTString& TTString::operator = (const std::string& aStdString)
 {
-	assign(aStdString.c_str(), aStdString.length());
+	mString = NULL;
+	mSize = 0;
+	return operator = (aStdString.c_str());
 }
 
-
-/** Find out the length of a string.  */
 size_t TTString::size() const
 {
-	return VECTOR->size();
+	return strlen(mString);
 }
 
-
-/** Find out the length of a string.  */
 size_t TTString::length() const
 {
 	return size();
 }
 
-
-// because when size() == 0 there is still a char (null terminator) in the vector, we have to override this
-bool TTString::empty() const
-{
-	return empty();
-}
-
-/** Allocate  memory for the string. */
 void TTString::resize(size_t newSize)
 {
-	VECTOR->resize(newSize);
-}
+	char *oldString = mString;
 
+	mSize = newSize;
+	mString = new char[newSize];
 
-/** Append / Concatenate */
-void TTString::append(const char *str, size_t length)
-{
-	VECTOR->append(str, length);
-	/*
-	if (!str)
+	if (!mString)
+	{
+		if (oldString)
+			delete[] oldString;
+		mSize = 0;
 		return;
+	}
 
-	if (length == 0)
-		length = strlen(str);
-
-	size_t oldSize = size();
-	size_t newSize = oldSize + length;
-
-	if (newSize >= capacity())
-		reserve(newSize + 256);
-
-	resize(newSize);
-	memcpy(&this->at(oldSize), str, length);
-	*/
+	if (oldString)
+	{
+		strcpy(mString, oldString);
+		delete[] oldString;
+	}
+	else
+		mString[0] = '\0';
 }
 
-
-void TTString::append(const char aChar)
+void TTString::clear()
 {
-	char s[2];
-
-	snprintf(s, 2, "%c", aChar);
-	append(s);
+	resize(0); // we call this instead of clear() on the vector because when we are empty we still have a string with 1 NULL termination char
 }
 
-
-void TTString::append(int anInt)
+bool TTString::empty()
 {
-	char s[16];
-
-	snprintf(s, 16, "%i", anInt);
-	append(s);
+	if (size() < 2) // empty means we have only 1 char (a NULL terminator)
+		return true;
+	else
+		return false;
 }
 
-
-void TTString::append(unsigned int aUInt)
+bool TTString::empty() const
 {
-	char s[16];
-
-	snprintf(s, 16, "%u", aUInt);
-	append(s);
+	return size() == 0;
 }
 
-
-void TTString::append(float aFloat)
+char& TTString::operator[] (const int index)
 {
-	char s[16];
-
-	snprintf(s, 16, "%f", aFloat);
-	append(s);
+	return this->at(index);
 }
 
-
-void TTString::append(double aDouble)
+char& TTString::at(size_t index) const
 {
-	char s[16];
-
-	snprintf(s, 16, "%lf", aDouble);
-	append(s);
+	return mString[index];
 }
 
+TTString& TTString::operator += (const char *aCString)
+{
+	int len = size() + strlen(aCString);
 
+	if (len >= mSize)
+		resize(len + 1);
+
+	strcat(mString, aCString);
+
+	return *this;
+}
+
+TTString& TTString::operator += (TTString& aTTString)
+{
+	return operator += (aTTString.mString);
+}
 
 TTString TTString::operator + (const char* arg)
 {
@@ -297,37 +189,66 @@ TTString TTString::operator + (const char* arg)
 	return result;
 }
 
-
-bool TTString::operator == (const char *cString) const
+TTString& TTString::append(const char *str, size_t length)
 {
-	const TTString s(cString);
-	return (*this) == s;
+	return operator += (str);
 }
 
-bool TTString::operator == (const TTString &other) const
+TTString& TTString::append(const char aChar)
 {
-	std::string& thisvec = *VECTOR;
-	std::string& othervec = *((std::string*)other.mVector);
+	char s[2];
 
-	return thisvec == othervec;
+	snprintf(s, 2, "%c", aChar);
+	return append(s);
 }
 
-
-bool TTString::operator != (const char *cString) const
+TTString& TTString::append(TTString aTTString)
 {
-	return !(*this == cString);
+	return append(aTTString.mString);
 }
 
-bool TTString::operator != (const TTString &other) const
+TTString& TTString::append(int anInt)
 {
-	return !(*this == other);
+	char s[16];
+
+	snprintf(s, 16, "%i", anInt);
+	return append(s);
 }
 
+TTString& TTString::append(unsigned int aUInt)
+{
+	char s[16];
 
-/** Return the index of the first instance of a specified char in the string.
-@param	aChar	The char for which to search
-@param	from	A position in the string from which to begin the search.  By default it starts at the beginning (0)
-*/
+	snprintf(s, 16, "%u", aUInt);
+	return append(s);
+}
+
+TTString& TTString::append(float aFloat)
+{
+	char s[16];
+
+	snprintf(s, 16, "%f", aFloat);
+	return append(s);
+}
+
+TTString& TTString::append(double aDouble)
+{
+	char s[16];
+
+	snprintf(s, 16, "%lf", aDouble);
+	return append(s);
+}
+
+const char* TTString::c_str() const
+{
+	return mString;
+}
+
+const char* TTString::data()
+{
+	return mString;
+}
+
 size_t TTString::find_first_of(const char aChar, size_t from)
 {
 	TTBoolean	found = NO;
@@ -345,9 +266,6 @@ size_t TTString::find_first_of(const char aChar, size_t from)
 		return -1;
 }
 
-/** Return the index of the last instance of a specified char in the string.
-@param	aChar	The char for which to search
-*/
 size_t TTString::find_last_of(const char aChar)
 {
 	TTBoolean	found = NO;
@@ -370,40 +288,43 @@ size_t TTString::find_last_of(const char aChar)
 		return -1;
 }
 
-
-/** Returns a string object with its contents initialized to a substring of the current object.
-@param pos	Position of a character in the current string object to be used as starting character for the substring.
-@param n 	Length of the substring.
-*/
 TTString TTString::substr(size_t pos, size_t n) const
 {
 	TTString	substring;
 	size_t		i;
 
 	if (pos + n > size())		// If the size is too large and thus the range extends past the end of the string...
-		n = size() - pos;	// we limit the range to end at the end of the string.
+		n = size() - pos;		// we limit the range to end at the end of the string.
 
-	substring.reserve(n + 16);
 	substring.resize(n);
-	for (i = 0; i<n; i++) {
-		substring[i] = (*this)[pos + i];
+	for (i = 0; i < n; i++) {
+		substring[i] = mString[pos + i];
 		if (pos + i >= size())
 			break;
 	}
 	return substring;
 }
 
-
-// This avoids a warning in GCC 4.7 about ambiguity between using an int vs. a size_t where
-// the int could also be considered an index into a char array
-char& TTString::operator[] (const int index)
+bool TTString::operator == (const char *aCString) const
 {
-	std::string& vec = *VECTOR;
-	return vec[index];
+	return strcmp(mString, aCString) == 0;
 }
 
+bool TTString::operator == (TTString aTTString) const
+{
+	return operator == (aTTString.mString);
+}
 
-//	TTBoolean toTTInt32( const TTString & str, TTInt32 & convertedInt )
+bool TTString::operator != (const char *aCString) const
+{
+	return !(mString == aCString);
+}
+
+bool TTString::operator != (TTString aTTString) const
+{
+	return !operator == (aTTString.mString);
+}
+
 TTBoolean TTString::toTTInt32(TTInt32& convertedInt) const
 {
 	char * pEnd;
@@ -412,7 +333,6 @@ TTBoolean TTString::toTTInt32(TTInt32& convertedInt) const
 	return *pEnd == 0;
 }
 
-//	TTBoolean toTTUInt32( const TTString & str, TTInt32 & convertedUInt )
 TTBoolean TTString::toTTUInt32(TTUInt32& convertedUInt) const
 {
 	char * pEnd;
@@ -423,10 +343,6 @@ TTBoolean TTString::toTTUInt32(TTUInt32& convertedUInt) const
 	return *pEnd == 'u' && pEnd == (c_str() + length() - 1);
 }
 
-/*	note : isTTFloat32 works only because the TTInt32 case is matched before
-see in TTValue::fromString method
-*/
-//	TTBoolean toTTFloat32( const TTString & str, TTFloat32 & convertedFloat )
 TTBoolean TTString::toTTFloat32(TTFloat32& convertedFloat) const
 {
 	char * pEnd;
