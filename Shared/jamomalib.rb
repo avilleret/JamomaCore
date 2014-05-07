@@ -1,7 +1,8 @@
+#!/usr/bin/env ruby -wKU
+# encoding: utf-8
 ###################################################################
 # Library of Ruby stuff for Jamoma
 ###################################################################
-
 
 require 'yaml'                    # Interface for data serialization in YAML format -- http://ruby-doc.org/stdlib-1.9.3/libdoc/yaml/rdoc/YAML.html
 $g_use_yaml_project_files = true
@@ -142,6 +143,14 @@ else
 	end
 
 	def log_build(str)
+		if win?
+			# added to avoid invalid UTF8 argument error when building
+			str.encoding
+			str.force_encoding('cp850')
+			str.encoding
+			str = str.encode('utf-8', :invalid => :replace, :undef => :replace)
+			#
+		end
 		@build_log.write(str)
 		@build_log.write("\n\n")
 		@build_log.flush
@@ -149,6 +158,14 @@ else
 
 	def log_error(str)
 		if (str.length > 0)
+			if win?
+				# added to avoid invalid UTF8 argument error when building
+				str.encoding
+				str.force_encoding('cp850')
+				str.encoding
+				str = str.encode('utf-8', :invalid => :replace, :undef => :replace)
+				#
+			end
 			@error_log.write(str)
 			@error_log.write("\n\n")
 			@error_log.flush
@@ -156,12 +173,28 @@ else
 	end
 
 	def log_test_fail(str)
+		if win?
+			# added to avoid invalid UTF8 argument error when building
+			str.encoding
+			str.force_encoding('cp850')
+			str.encoding
+			str = str.encode('utf-8', :invalid => :replace, :undef => :replace)
+			#
+		end
 		@testFail_log.write(str)
 		@testFail_log.write("\n")
 		@testFail_log.flush
 	end
 
 	def log_test_pass(str)
+		if win?
+			# added to avoid invalid UTF8 argument error when building
+			str.encoding
+			str.force_encoding('cp850')
+			str.encoding
+			str = str.encode('utf-8', :invalid => :replace, :undef => :replace)
+			#
+		end
 		@testPass_log.write(str)
 		@testPass_log.write("\n")
 		@testPass_log.flush
