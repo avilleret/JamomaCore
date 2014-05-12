@@ -247,7 +247,7 @@ void createBoxStartTimeData()
 	returnValueCallback = NULL;
 	TTObjectBaseInstantiate(TTSymbol("callback"), TTObjectBaseHandle(&returnValueCallback), kTTValNONE);
 	returnValueCallback->setAttributeValue(kTTSym_baton, TTPtr(batonDemoData));
-	returnValueCallback->setAttributeValue(kTTSym_function, TTPtr(BoxIdDataReturnValueCallback));
+	returnValueCallback->setAttributeValue(kTTSym_function, TTPtr(BoxStartTimeDataReturnValueCallback));
 	args.append(returnValueCallback);
 	args.append(kTTSym_message);
 
@@ -285,7 +285,7 @@ void createBoxDurationData()
 	returnValueCallback = NULL;
 	TTObjectBaseInstantiate(TTSymbol("callback"), TTObjectBaseHandle(&returnValueCallback), kTTValNONE);
 	returnValueCallback->setAttributeValue(kTTSym_baton, TTPtr(batonDemoData));
-	returnValueCallback->setAttributeValue(kTTSym_function, TTPtr(BoxIdDataReturnValueCallback));
+	returnValueCallback->setAttributeValue(kTTSym_function, TTPtr(BoxDurationDataReturnValueCallback));
 	args.append(returnValueCallback);
 	args.append(kTTSym_message);
 

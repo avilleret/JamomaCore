@@ -32,7 +32,12 @@
 	@seealso TTSymbol
 */
 
+// TODO : create a custom iterator
+typedef char* TTStringIter;
+
 class TTFOUNDATION_EXPORT TTString {
+
+private:
 
 	char	*mString;
 	size_t	mSize;
@@ -52,6 +57,13 @@ public:
 	TTString& operator = (const char aChar);
 	TTString& operator = (const TTString& aTTString);
 	TTString& operator = (const std::string& aStdString);
+
+	///////////////
+	// Iterators //
+	///////////////
+
+	TTStringIter begin() { return mString; };
+	TTStringIter end() { return mString + mSize; };
 
 	//////////////
 	// Capacity //
