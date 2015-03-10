@@ -38,10 +38,11 @@ function(addJamomaLibrary)
 		install(FILES ${PROJECT_HDRS} DESTINATION "include/jamoma" COMPONENT Devel)
 	endif()
 
-	export(EXPORT ${PROJECT_NAME}Targets
-		   FILE "${CMAKE_CURRENT_BINARY_DIR}/Jamoma/Jamoma${PROJECT_NAME}Targets.cmake"
-		   NAMESPACE Jamoma::)
-
+	
+        #~ export(EXPORT ${PROJECT_NAME}Targets
+		   #~ FILE "${CMAKE_CURRENT_BINARY_DIR}/Jamoma/Jamoma${PROJECT_NAME}Targets.cmake"
+		   #~ NAMESPACE Jamoma::)
+        
 	install(EXPORT ${PROJECT_NAME}Targets
 			FILE Jamoma${PROJECT_NAME}Targets.cmake
 			NAMESPACE Jamoma::
